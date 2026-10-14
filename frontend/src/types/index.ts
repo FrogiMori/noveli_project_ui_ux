@@ -151,3 +151,50 @@ export interface AIRecommendationResponse {
   source: 'cache' | 'openai';
   generatedAt: string;
 }
+
+// ─── Instagram-like Bookstagram Types ─────────────────────────
+
+export interface Story {
+  id: string;
+  user: {
+    id: string;
+    biDanh: string;
+    avatarSeed: string;
+  };
+  type: 'reading' | 'quote' | 'completed' | 'streak';
+  bookTitle?: string;
+  quote?: string;
+  currentPage?: number;
+  pageCount?: number;
+  image: string;
+  createdAt: string;
+  seen: boolean;
+}
+
+export interface FeedComment {
+  id: string;
+  author: string;
+  content: string;
+  createdAt: string;
+}
+
+export interface FeedPost {
+  id: string;
+  author: {
+    id: string;
+    biDanh: string;
+    avatarSeed: string;
+  };
+  book: Book;
+  image: string;
+  caption: string;
+  likesCount: number;
+  isLiked: boolean;
+  isSaved: boolean;
+  commentsCount: number;
+  currentPage?: number;
+  pageCount?: number;
+  hasSpoilers: boolean;
+  createdAt: string;
+  comments: FeedComment[];
+}
