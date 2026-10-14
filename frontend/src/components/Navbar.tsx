@@ -196,9 +196,9 @@ export const Navbar: React.FC<NavbarProps> = ({
               alignItems: 'center',
               justifyContent: 'center',
             }}
-            title={theme === 'dark' ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối'}
+            title={theme.startsWith('dark') ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối'}
           >
-            {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
+            {theme.startsWith('dark') ? <Sun size={17} /> : <Moon size={17} />}
           </button>
 
           {/* User Pseudonym Account Badge */}

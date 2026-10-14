@@ -2,10 +2,21 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
 import { api, clearToken } from '../services/api';
 
+export type ThemeMode =
+  | 'dark-midnight'
+  | 'dark-coffee'
+  | 'dark-forest'
+  | 'dark-navy'
+  | 'light-sepia'
+  | 'light-cream'
+  | 'light-matcha'
+  | 'light-peach';
+
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  theme: 'dark' | 'light';
+  theme: ThemeMode;
+  setThemeMode: (mode: ThemeMode) => void;
   toggleTheme: () => void;
   login: (biDanh: string, pass: string) => Promise<void>;
   register: (biDanh: string, pass: string) => Promise<string>;
@@ -19,13 +30,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [theme, setTheme] = useState<ThemeMode>('dark-midnight');
 
-  // Auto-login with default demo account if no user is logged in
   useEffect(() => {
     async function initAuth() {
       try {
-        const storedTheme = (localStorage.getItem('bookaholic_theme') as 'dark' | 'light') || 'dark';
+        const storedTheme = (localStorage.getItem('bookaholic_theme_variant') as ThemeMode) || 'dark-midnight';
         setTheme(storedTheme);
         document.documentElement.setAttribute('data-theme', storedTheme);
 
@@ -41,11 +51,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initAuth();
   }, []);
 
+  const setThemeMode = (mode: ThemeMode) => {
+    setTheme(mode);
+    localStorage.setItem('bookaholic_theme_variant', mode);
+    document.documentElement.setAttribute('data-theme', mode);
+  };
+
   const toggleTheme = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(newTheme);
-    localStorage.setItem('bookaholic_theme', newTheme);
-    document.documentElement.setAttribute('data-theme', newTheme);
+    // Quick toggle between default dark (dark-midnight) and reading sepia (light-sepia)
+    const newTheme: ThemeMode = theme.startsWith('dark') ? 'light-sepia' : 'dark-midnight';
+    setThemeMode(newTheme);
   };
 
   const login = async (biDanh: string, pass: string) => {
@@ -84,6 +99,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         loading,
         theme,
+        setThemeMode,
         toggleTheme,
         login,
         register,

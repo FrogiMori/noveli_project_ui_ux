@@ -2,18 +2,14 @@ import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import {
   Home,
-  Search,
   Compass,
   Film,
   MessageSquare,
   PlusSquare,
-  User as UserIcon,
-  Moon,
-  Sun,
-  Flame,
-  Menu,
-  ShieldCheck,
   Bookmark,
+  Palette,
+  Flame,
+  ShieldCheck,
 } from 'lucide-react';
 
 export type IgTab = 'home' | 'search' | 'explore' | 'reels' | 'forum' | 'shelves' | 'profile';
@@ -24,6 +20,7 @@ interface InstagramSidebarProps {
   onOpenCreateModal: () => void;
   onOpenAuthModal: () => void;
   onOpenLogModal: () => void;
+  onOpenThemeModal: () => void;
 }
 
 export const InstagramSidebar: React.FC<InstagramSidebarProps> = ({
@@ -32,8 +29,9 @@ export const InstagramSidebar: React.FC<InstagramSidebarProps> = ({
   onOpenCreateModal,
   onOpenAuthModal,
   onOpenLogModal,
+  onOpenThemeModal,
 }) => {
-  const { user, theme, toggleTheme } = useAuth();
+  const { user, theme } = useAuth();
 
   const navItems = [
     { id: 'home', label: 'Trang chủ', icon: Home },
@@ -189,19 +187,40 @@ export const InstagramSidebar: React.FC<InstagramSidebarProps> = ({
                   width: '100%',
                   height: '100%',
                   borderRadius: '50%',
-                  backgroundColor: '#121212',
+                  backgroundColor: 'var(--ig-surface)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontSize: 11,
                   fontWeight: 700,
-                  color: '#fff',
+                  color: 'var(--ig-text)',
                 }}
               >
                 {user ? user.biDanh[0].toUpperCase() : 'U'}
               </div>
             </div>
             <span>Trang cá nhân</span>
+          </button>
+
+          {/* Eye-Care Theme Palette button */}
+          <button
+            onClick={onOpenThemeModal}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 16,
+              padding: '12px 14px',
+              borderRadius: 10,
+              fontSize: 15,
+              fontWeight: 500,
+              color: 'var(--amber-400)',
+              cursor: 'pointer',
+              marginTop: 4,
+            }}
+            className="ig-nav-btn"
+          >
+            <Palette size={24} strokeWidth={1.8} />
+            <span>Chế độ dịu mắt</span>
           </button>
         </nav>
       </div>
@@ -218,7 +237,7 @@ export const InstagramSidebar: React.FC<InstagramSidebarProps> = ({
               justifyContent: 'space-between',
               padding: '10px 14px',
               borderRadius: 12,
-              background: 'rgba(245, 158, 11, 0.1)',
+              background: 'rgba(245, 158, 11, 0.12)',
               border: '1px solid rgba(245, 158, 11, 0.25)',
               cursor: 'pointer',
             }}
@@ -233,7 +252,7 @@ export const InstagramSidebar: React.FC<InstagramSidebarProps> = ({
           </div>
         )}
 
-        {/* Account Switcher & Theme Toggle */}
+        {/* Account Switcher & Theme Selector Modal Button */}
         <div style={{ display: 'flex', gap: 6 }}>
           <button
             onClick={onOpenAuthModal}
@@ -247,12 +266,12 @@ export const InstagramSidebar: React.FC<InstagramSidebarProps> = ({
           </button>
 
           <button
-            onClick={toggleTheme}
+            onClick={onOpenThemeModal}
             className="btn btn-secondary btn-sm"
-            style={{ padding: '6px 10px' }}
-            title="Đổi giao diện sáng/tối"
+            style={{ padding: '6px 10px', color: 'var(--amber-400)' }}
+            title="Đổi phối màu dịu mắt (8 giao diện sáng/tối)"
           >
-            {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+            <Palette size={15} />
           </button>
         </div>
       </div>

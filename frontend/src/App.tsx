@@ -12,6 +12,7 @@ import { CreatePostModal } from './components/CreatePostModal';
 import { BookDetailModal } from './components/BookDetailModal';
 import { ReadingLogModal } from './components/ReadingLogModal';
 import { AuthModal } from './components/AuthModal';
+import { ThemeSelectorModal } from './components/ThemeSelectorModal';
 import { FeedPost, Story, Book, ShelfType } from './types';
 import { api } from './services/api';
 import { Home, Compass, Film, Bookmark, MessageSquare, User as UserIcon } from 'lucide-react';
@@ -24,6 +25,7 @@ function InstagramApp() {
   const [openCreateModal, setOpenCreateModal] = useState(false);
   const [openLogModal, setOpenLogModal] = useState(false);
   const [openAuthModal, setOpenAuthModal] = useState(false);
+  const [openThemeModal, setOpenThemeModal] = useState(false);
 
   // Initial Instagram Feed Posts
   const [posts, setPosts] = useState<FeedPost[]>([
@@ -150,6 +152,7 @@ function InstagramApp() {
         onOpenCreateModal={() => setOpenCreateModal(true)}
         onOpenAuthModal={() => setOpenAuthModal(true)}
         onOpenLogModal={() => setOpenLogModal(true)}
+        onOpenThemeModal={() => setOpenThemeModal(true)}
       />
 
       {/* ─── 2. Main Content Feed / Active View ──────────────── */}
@@ -301,6 +304,10 @@ function InstagramApp() {
 
       {openAuthModal && (
         <AuthModal onClose={() => setOpenAuthModal(false)} />
+      )}
+
+      {openThemeModal && (
+        <ThemeSelectorModal onClose={() => setOpenThemeModal(false)} />
       )}
     </div>
   );
