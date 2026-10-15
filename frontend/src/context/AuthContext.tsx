@@ -34,12 +34,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [theme, setTheme] = useState<ThemeMode>('dark-midnight');
+  const [theme, setTheme] = useState<ThemeMode>('light-sepia');
 
   useEffect(() => {
     async function initAuth() {
       try {
-        const storedTheme = (localStorage.getItem('noveli_theme_variant') as ThemeMode) || 'dark-midnight';
+        const storedTheme = (localStorage.getItem('noveli_theme_variant') as ThemeMode) || 'light-sepia';
         setTheme(storedTheme);
         document.documentElement.setAttribute('data-theme', storedTheme);
 
@@ -89,7 +89,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const toggleTheme = () => {
-    const newTheme: ThemeMode = theme.startsWith('dark') ? 'light-sepia' : 'dark-midnight';
+    // Quick toggle between classic reading Sepia (Giấy cổ điển) and Dark Coffee (Espresso)
+    const newTheme: ThemeMode = theme === 'light-sepia' ? 'dark-coffee' : 'light-sepia';
     setThemeMode(newTheme);
   };
 

@@ -67,7 +67,7 @@ export const ThemeSelectorModal: React.FC<ThemeSelectorModalProps> = ({ onClose 
     {
       id: 'light-sepia',
       name: 'Giấy Cổ Điển Sepia',
-      badge: '📜 Như trang sách thật',
+      badge: '⭐ Mặc định • Như trang sách thật',
       desc: 'Màu giấy ngả vàng truyền thống, triệt tiêu ánh sáng xanh, đọc nhiều giờ không mỏi',
       bgHex: '#f6efe2',
       surfaceHex: '#fcf8f0',

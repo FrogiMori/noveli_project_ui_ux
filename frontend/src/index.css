@@ -7,25 +7,25 @@
   --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
 
-  /* Default Theme: Midnight Dark */
-  --ig-bg: #000000;
-  --ig-surface: #121212;
-  --ig-elevated: #1e1e1e;
-  --ig-border: #262626;
-  --ig-border-subtle: #1a1a1a;
-  --ig-text: #f5f5f5;
-  --ig-text-secondary: #a8a8a8;
-  --ig-text-muted: #737373;
-  --ig-link: #e0f1ff;
+  /* Default Theme: Giấy Cổ Điển Sepia (Warm Classic Paper) */
+  --ig-bg: #f6efe2;
+  --ig-surface: #fcf8f0;
+  --ig-elevated: #ede2cf;
+  --ig-border: #ded1ba;
+  --ig-border-subtle: #ebe0cd;
+  --ig-text: #382c21;
+  --ig-text-secondary: #6e5b4b;
+  --ig-text-muted: #9c8774;
+  --ig-link: #8c4e1f;
 
-  --ig-story-gradient: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
-  --ig-primary-blue: #0095f6;
-  --ig-primary-hover: #1877f2;
+  --ig-story-gradient: linear-gradient(45deg, #d97706 0%, #b45309 50%, #78350f 100%);
+  --ig-primary-blue: #8c4e1f;
+  --ig-primary-hover: #733f17;
   --ig-heart-red: #ff3040;
 
-  --amber-400: #fbbf24;
-  --amber-500: #f59e0b;
-  --amber-glow: rgba(245, 158, 11, 0.25);
+  --amber-400: #a8622c;
+  --amber-500: #8c4e1f;
+  --amber-glow: rgba(140, 78, 31, 0.2);
   --emerald-400: #34d399;
   --emerald-500: #10b981;
   --rose-400: #fb7185;
