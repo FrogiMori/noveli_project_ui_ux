@@ -8,14 +8,11 @@
     "strict": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "moduleResolution": "node",
     "skipLibCheck": true,
     "sourceMap": true,
     "declaration": true,
-    "ignoreDeprecations": "5.0",
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
     "types": ["node"]
   },
