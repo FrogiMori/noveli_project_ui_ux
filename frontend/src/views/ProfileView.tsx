@@ -108,7 +108,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             </div>
             <p style={{ fontSize: 13, color: 'var(--ig-text-secondary)', marginTop: 4, lineHeight: 1.5 }}>
               Đọc sách để hiểu mình, hiểu đời. Mục tiêu hoàn thành 24 cuốn sách trong năm 2026.
-              Tham gia thảo luận văn học ẩn danh cùng cộng đồng Bookaholic ☕📚
+              Tham gia thảo luận văn học ẩn danh cùng cộng đồng Noveli ☕📚
             </p>
             <div style={{ fontSize: 12, color: 'var(--emerald-400)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
               <ShieldCheck size={13} /> Danh tính bảo mật Zero-Tracking

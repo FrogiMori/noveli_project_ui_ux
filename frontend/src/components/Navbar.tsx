@@ -99,7 +99,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 WebkitTextFillColor: 'transparent',
               }}
             >
-              Bookaholic
+              Noveli
             </span>
             <div
               style={{

@@ -248,7 +248,7 @@ export const DiscoverView: React.FC<DiscoverViewProps> = ({ onSelectBook, onOpen
       {/* Books Grid */}
       {loading ? (
         <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>
-          Đang tải kho sách Bookaholic...
+          Đang tải kho sách Noveli...
         </div>
       ) : books.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '60px 0' }}>

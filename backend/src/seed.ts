@@ -4,7 +4,7 @@ import { prisma } from './config/prisma';
 import { ShelfType, GoalStatus } from '@prisma/client';
 
 async function main() {
-  console.log('🌱 Starting database seeding for Bookaholic...');
+  console.log('🌱 Starting database seeding for Noveli...');
 
   // Clean existing data in reverse order of foreign keys
   await prisma.post.deleteMany();

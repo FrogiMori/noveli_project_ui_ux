@@ -188,7 +188,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPos
             </label>
             <textarea
               rows={4}
-              placeholder="Chia sẻ cảm xúc hoặc trích dẫn ấn tượng bạn vừa đọc được... #Bookaholic #Reading #SachHay"
+              placeholder="Chia sẻ cảm xúc hoặc trích dẫn ấn tượng bạn vừa đọc được... #Noveli #Reading #SachHay"
               className="input-field"
               value={caption}
               onChange={(e) => setCaption(e.target.value)}

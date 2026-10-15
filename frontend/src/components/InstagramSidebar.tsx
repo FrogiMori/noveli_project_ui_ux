@@ -96,7 +96,7 @@ export const InstagramSidebar: React.FC<InstagramSidebarProps> = ({
               WebkitTextFillColor: 'transparent',
             }}
           >
-            Bookaholic
+            Noveli
           </span>
         </div>
 

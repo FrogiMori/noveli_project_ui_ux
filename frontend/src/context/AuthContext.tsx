@@ -39,7 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     async function initAuth() {
       try {
-        const storedTheme = (localStorage.getItem('bookaholic_theme_variant') as ThemeMode) || 'dark-midnight';
+        const storedTheme = (localStorage.getItem('noveli_theme_variant') as ThemeMode) || (localStorage.getItem('bookaholic_theme_variant') as ThemeMode) || 'dark-midnight';
         setTheme(storedTheme);
         document.documentElement.setAttribute('data-theme', storedTheme);
 
@@ -84,7 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const setThemeMode = (mode: ThemeMode) => {
     setTheme(mode);
-    localStorage.setItem('bookaholic_theme_variant', mode);
+    localStorage.setItem('noveli_theme_variant', mode);
     document.documentElement.setAttribute('data-theme', mode);
   };
 

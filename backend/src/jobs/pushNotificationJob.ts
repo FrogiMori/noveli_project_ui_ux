@@ -3,7 +3,7 @@ import { prisma } from '../config/prisma';
 
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY ?? '';
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY ?? '';
-const VAPID_SUBJECT = process.env.VAPID_SUBJECT ?? 'mailto:noreply@bookaholic.app';
+const VAPID_SUBJECT = process.env.VAPID_SUBJECT ?? 'mailto:noreply@noveli.app';
 
 if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
   webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
@@ -33,7 +33,7 @@ export async function sendReadingReminders(): Promise<void> {
   console.log(`[Push] Sending reminders to ${subscriptions.length} devices at ${currentTime}`);
 
   const payload = JSON.stringify({
-    title: '📚 Bookaholic — Giờ đọc sách!',
+    title: '📚 Noveli — Giờ đọc sách!',
     body: 'Dành 15 phút để đọc hôm nay. Duy trì chuỗi ngày đọc của bạn!',
     icon: '/icons/icon-192x192.png',
     badge: '/icons/badge-72x72.png',

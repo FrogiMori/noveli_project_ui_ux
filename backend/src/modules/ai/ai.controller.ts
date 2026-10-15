@@ -129,7 +129,7 @@ export async function getAIRecommendations(req: Request, res: Response): Promise
           .join('\n')
       : 'The user has no reading history yet.';
 
-  const systemPrompt = `You are a world-class literary advisor called "Bookaholic AI". 
+  const systemPrompt = `You are a world-class literary advisor called "Noveli AI". 
 Respond in valid JSON only. Do not include markdown or prose outside the JSON object.`;
 
   const userPrompt = `

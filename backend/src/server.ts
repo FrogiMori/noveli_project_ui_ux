@@ -16,7 +16,7 @@ async function bootstrap() {
   const app = createApp();
 
   const server = app.listen(ENV.PORT, () => {
-    console.log(`[Server] Bookaholic API running on port ${ENV.PORT} (${ENV.NODE_ENV})`);
+    console.log(`[Server] Noveli API running on port ${ENV.PORT} (${ENV.NODE_ENV})`);
   });
 
   // 4. Start background jobs

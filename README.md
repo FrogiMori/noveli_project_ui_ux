@@ -1,6 +1,6 @@
-# Bookaholic
+# Noveli
 
-Bookaholic is a full-stack social reading platform that combines book discovery, reading tracking, personalized bookshelves, anonymous discussions, and AI-based recommendations. The platform is built with a **privacy-first architecture**: zero email or phone requirements, zero IP logging, pseudonymous identities (`biDanh`), and 160-bit cryptographic account recovery.
+Noveli is a full-stack social reading platform that combines book discovery, reading tracking, personalized bookshelves, anonymous discussions, and AI-based recommendations. The platform is built with a **privacy-first architecture**: zero email or phone requirements, zero IP logging, pseudonymous identities (`biDanh`), and 160-bit cryptographic account recovery.
 
 ---
 
@@ -201,7 +201,7 @@ All API endpoints reside under `/api/v1`:
 
 ## 🧪 Automated Testing
 
-Bookaholic includes end-to-end integration and security test suites using Node's native test runner:
+Noveli includes end-to-end integration and security test suites using Node's native test runner:
 
 ```bash
 cd backend

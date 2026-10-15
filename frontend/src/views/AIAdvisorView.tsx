@@ -47,7 +47,7 @@ export const AIAdvisorView: React.FC<AIAdvisorViewProps> = ({ onSearchBook }) =>
         }}
       >
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 9999, background: 'rgba(99, 102, 241, 0.2)', color: 'var(--indigo-400)', fontSize: 12, fontWeight: 700, marginBottom: 12 }}>
-          <Sparkles size={14} /> BOOKAHOLIC LITERARY AI ADVISOR
+          <Sparkles size={14} /> NOVELI LITERARY AI ADVISOR
         </div>
         <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8 }}>
           Cố Vấn Đọc Sách Thông Minh

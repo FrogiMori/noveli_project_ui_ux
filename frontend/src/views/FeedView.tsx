@@ -296,9 +296,9 @@ export const FeedView: React.FC<FeedViewProps> = ({
         {/* Privacy Note Footer */}
         <div style={{ marginTop: 28, fontSize: 11, color: 'var(--ig-text-muted)', lineHeight: 1.6 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--emerald-400)', fontWeight: 600, marginBottom: 4 }}>
-            <ShieldCheck size={12} /> Bookaholic Privacy Pledge
+            <ShieldCheck size={12} /> Noveli Privacy Pledge
           </div>
-          Ẩn danh tuyệt đối • Không lưu vết IP • Không bán dữ liệu • 2026 Bookaholic
+          Ẩn danh tuyệt đối • Không lưu vết IP • Không bán dữ liệu • 2026 Noveli
         </div>
       </div>
 
