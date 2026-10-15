@@ -60,7 +60,7 @@ export const InstagramSidebar: React.FC<InstagramSidebarProps> = ({
       }}
     >
       <div>
-        {/* Instagram / Bookaholic Brand Logo */}
+        {/* Instagram / Noveli Brand Logo */}
         <div
           onClick={() => onTabChange('home')}
           style={{

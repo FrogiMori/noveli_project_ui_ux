@@ -39,7 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     async function initAuth() {
       try {
-        const storedTheme = (localStorage.getItem('noveli_theme_variant') as ThemeMode) || (localStorage.getItem('bookaholic_theme_variant') as ThemeMode) || 'dark-midnight';
+        const storedTheme = (localStorage.getItem('noveli_theme_variant') as ThemeMode) || 'dark-midnight';
         setTheme(storedTheme);
         document.documentElement.setAttribute('data-theme', storedTheme);
 
@@ -66,7 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // 3. Optional fallback in development: if no user is logged in, try demo user
         // This ensures the demo is immediately useful while still preserving real accounts
         try {
-          const res = await api.login('sach_va_tra', 'Bookaholic@2026!');
+          const res = await api.login('sach_va_tra', 'Noveli@2026!');
           setUser(res.user);
         } catch {
           // If demo user is unavailable or password changed, leave user as null
@@ -107,7 +107,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const switchDemoUser = async (biDanh: string) => {
     setLoading(true);
     try {
-      const res = await api.login(biDanh, 'Bookaholic@2026!');
+      const res = await api.login(biDanh, 'Noveli@2026!');
       setUser(res.user);
     } finally {
       setLoading(false);

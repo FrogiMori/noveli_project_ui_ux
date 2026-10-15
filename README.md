@@ -33,7 +33,7 @@ Noveli is a full-stack social reading platform that combines book discovery, rea
 ## 🏗 Architecture & Tech Stack
 
 ```text
-bookaholic/
+noveli/
 ├── backend/
 │   ├── prisma/
 │   │   ├── migrations/0_init/   # Baseline migration for production deployment
@@ -85,7 +85,7 @@ From the project root:
 docker compose up -d
 ```
 This boots:
-- **PostgreSQL** on `localhost:5432` (database: `bookaholic_db`)
+- **PostgreSQL** on `localhost:5432` (database: `noveli_db`)
 - **Redis** on `localhost:6379`
 
 ### 3. Backend Setup
@@ -99,7 +99,7 @@ Configure your `backend/.env` with required parameters:
 ```ini
 PORT=4000
 NODE_ENV=development
-DATABASE_URL="postgresql://bookaholic_user:bookaholic_pass_2026!@localhost:5432/bookaholic_db?schema=public"
+DATABASE_URL="postgresql://noveli:strong_password@localhost:5432/noveli_db?schema=public"
 REDIS_URL="redis://localhost:6379"
 JWT_ACCESS_SECRET="your-jwt-access-secret-min-32-chars"
 JWT_REFRESH_SECRET="your-jwt-refresh-secret-min-32-chars"
@@ -140,9 +140,9 @@ When running `npm run db:seed`, three interactive profiles are available:
 
 | Pseudonym (`biDanh`) | Password | Reading Persona | Streak |
 |---|---|---|---|
-| `sach_va_tra` | `Bookaholic@2026!` | Độc giả yêu trà & triết học | 7 ngày liên tiếp 🔥 |
-| `ke_ngao_du` | `Bookaholic@2026!` | Thích phiêu lưu & khoa học viễn tưởng | 12 ngày liên tiếp 🔥 |
-| `dem_muon_doc_sach` | `Bookaholic@2026!` | Cú đêm đọc tiểu thuyết cảm động | 3 ngày liên tiếp 🔥 |
+| `sach_va_tra` | `Noveli@2026!` | Độc giả yêu trà & triết học | 7 ngày liên tiếp 🔥 |
+| `ke_ngao_du` | `Noveli@2026!` | Thích phiêu lưu & khoa học viễn tưởng | 12 ngày liên tiếp 🔥 |
+| `dem_muon_doc_sach` | `Noveli@2026!` | Cú đêm đọc tiểu thuyết cảm động | 3 ngày liên tiếp 🔥 |
 
 You can switch between demo accounts instantly from the **Demo** tab in the Auth Modal, or register brand-new pseudonyms.
 

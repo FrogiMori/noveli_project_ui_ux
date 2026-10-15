@@ -1,25 +1,25 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: bookaholic-postgres
+    container_name: noveli-postgres
     restart: always
     environment:
-      POSTGRES_USER: bookaholic
-      POSTGRES_PASSWORD: bookaholic_secret_password
-      POSTGRES_DB: bookaholic_db
+      POSTGRES_USER: noveli
+      POSTGRES_PASSWORD: noveli_secret_password
+      POSTGRES_DB: noveli_db
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U bookaholic -d bookaholic_db"]
+      test: ["CMD-SHELL", "pg_isready -U noveli -d noveli_db"]
       interval: 5s
       timeout: 5s
       retries: 5
 
   redis:
     image: redis:7-alpine
-    container_name: bookaholic-redis
+    container_name: noveli-redis
     restart: always
     command: redis-server --appendonly yes
     ports:

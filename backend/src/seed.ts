@@ -128,7 +128,7 @@ async function main() {
   console.log(`📚 Created ${createdBooks.length} curated books.`);
 
   // ─── 2. Users Seed ────────────────────────────────────────────────────────
-  const passwordHash = await bcrypt.hash('Bookaholic@2026!', 10);
+  const passwordHash = await bcrypt.hash('Noveli@2026!', 10);
   const recoveryHash = (key: string) => crypto.createHash('sha256').update(key).digest('hex');
 
   const user1 = await prisma.user.create({
@@ -170,7 +170,7 @@ async function main() {
     },
   });
 
-  console.log('👤 Created 3 demo users (password: Bookaholic@2026!)');
+  console.log('👤 Created 3 demo users (password: Noveli@2026!)');
 
   // ─── 3. Shelves & Progress Seed ──────────────────────────────────────────
   await prisma.shelf.createMany({

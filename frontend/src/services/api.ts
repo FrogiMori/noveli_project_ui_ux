@@ -14,7 +14,7 @@ import {
 const BASE_URL = '/api/v1';
 
 export function getToken(): string | null {
-  return localStorage.getItem('noveli_token') || localStorage.getItem('bookaholic_token');
+  return localStorage.getItem('noveli_token');
 }
 
 export function setToken(token: string): void {
@@ -23,7 +23,6 @@ export function setToken(token: string): void {
 
 export function clearToken(): void {
   localStorage.removeItem('noveli_token');
-  localStorage.removeItem('bookaholic_token');
 }
 
 let isRefreshing = false;
