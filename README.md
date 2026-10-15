@@ -1,311 +1,246 @@
 # Bookaholic
 
-Bookaholic is a full-stack social reading platform that combines book discovery, reading tracking, personalized shelves, anonymous discussions, and AI-based recommendations. The app is designed for readers who want to save books, monitor progress, engage with a book community, and discover what to read next.
+Bookaholic is a full-stack social reading platform that combines book discovery, reading tracking, personalized bookshelves, anonymous discussions, and AI-based recommendations. The platform is built with a **privacy-first architecture**: zero email or phone requirements, zero IP logging, pseudonymous identities (`biDanh`), and 160-bit cryptographic account recovery.
 
-## Overview
+---
 
-The project is split into two main parts:
+## 🌟 Key Features
 
-- Frontend: a React + TypeScript single-page app with an Instagram-inspired reading feed and marketplace-like discovery experience.
-- Backend: a Node.js + Express API with Prisma ORM, PostgreSQL, Redis, JWT auth, rate limiting, AI recommendations, and push-notification support.
-- Infrastructure: PostgreSQL and Redis are provisioned with Docker Compose.
+- **Privacy-First Authentication**:
+  - No email, phone numbers, or third-party OAuth trackers required.
+  - Accounts use unique pseudonyms (`biDanh`) and bcrypt-hashed passwords.
+  - 160-bit cryptographic Recovery Key (`BKHL-XXXXXXXX-...`) for deterministic zero-knowledge account recovery.
+  - Dual-token auth: 15-minute JWT access tokens + rotating HttpOnly `SameSite=Strict` refresh cookies.
+  - Per-device session invalidation and global session revocation (`logout-all`).
+- **Reading Tracking & Streaks**:
+  - Track daily reading sessions, start/end pages, duration, and personal notes.
+  - Automatic streak calculation and annual goal tracking.
+  - Idempotent log synchronization with UUID client identifiers.
+- **Shelves & Book Catalog**:
+  - Curated and custom shelves (`WANT_TO_READ`, `CURRENTLY_READING`, `READ`, `DID_NOT_FINISH`).
+  - Integrated search with Google Books API and community rating recalculation.
+- **Privacy-Preserving Anonymous Forum**:
+  - Book-centric discussion threads and nested replies.
+  - Author identities are anonymized per-thread using keyed HMAC hashes with unique pseudonymous display aliases.
+  - Spoiler-safe content blurring.
+- **AI Reading Advisor**:
+  - OpenAI-powered contextual book recommendations based on reader mood, past shelves, and literary preferences.
+- **PWA & Push Notifications**:
+  - Web Push notifications (VAPID) for daily reading reminders and streak protection.
 
-## Architecture
+---
 
-The application follows a layered architecture:
-
-- Frontend client communicates with the backend API over REST endpoints.
-- Backend validates requests, authenticates users, interacts with Prisma and Redis, and exposes API routes grouped by functionality.
-- Prisma is used for database access and schema management.
-- Redis supports caching, job queues, and future session / rate-limiting helpers.
-- PostgreSQL stores persistent application data such as users, shelves, books, reviews, reading logs, forum threads, and goals.
-
-## Tech Stack
-
-### Frontend
-
-- React 19
-- TypeScript
-- Vite
-- Lucide React icons
-- Canvas Confetti for celebratory interactions
-- CSS-based UI styling with component-driven layout and modal flows
-
-### Backend
-
-- Node.js
-- TypeScript
-- Express 5
-- Prisma ORM
-- PostgreSQL
-- Redis
-- JWT-based authentication
-- Helmet, CORS, cookie parsing, Morgan
-- Express rate limiting
-- OpenAI integration for AI recommendations
-- Web Push for notification support
-- Socket.IO support is included in dependencies for real-time or event-driven features
-- Zod for validation
-
-### Database
-
-- PostgreSQL 16 via Docker
-- Prisma schema with models for:
-  - users
-  - refresh tokens
-  - push subscriptions
-  - books
-  - shelves
-  - reviews
-  - threads
-  - posts
-  - reading logs
-  - goals
-
-### DevOps / Infra
-
-- Docker Compose
-- PostgreSQL container on port 5432
-- Redis container on port 6379
-- Environment-based configuration for secrets and runtime settings
-
-## Project Structure
+## 🏗 Architecture & Tech Stack
 
 ```text
 bookaholic/
 ├── backend/
 │   ├── prisma/
-│   │   └── schema.prisma
+│   │   ├── migrations/0_init/   # Baseline migration for production deployment
+│   │   └── schema.prisma        # Complete schema (10 models, indexes, enums)
 │   ├── src/
-│   │   ├── config/
-│   │   ├── jobs/
-│   │   ├── middlewares/
-│   │   ├── modules/
-│   │   ├── utils/
-│   │   ├── app.ts
-│   │   ├── server.ts
-│   │   └── seed.ts
+│   │   ├── config/              # Prisma, Redis, ENV loaders
+│   │   ├── jobs/                # Web Push notification cron jobs
+│   │   ├── middlewares/         # Privacy shield, rate limiter, JWT authenticate
+│   │   ├── modules/             # Auth, Books, Shelves, Forum, Reading Logs, AI, Analytics
+│   │   ├── utils/               # Tokens, crypto, Zod schemas
+│   │   ├── app.ts               # Express application factory
+│   │   ├── server.ts            # HTTP server bootstrap & graceful shutdown
+│   │   └── seed.ts              # Demo seed data script
+│   ├── tests/                   # End-to-end integration & security test suites
 │   ├── .env.example
 │   ├── package.json
 │   └── tsconfig.json
 ├── frontend/
 │   ├── src/
+│   │   ├── components/          # AuthModal, BookCard, Navbar, Modals
+│   │   ├── context/             # AuthContext (session restoration, theme manager)
+│   │   ├── services/            # API client with auto-refresh queue & credentials
+│   │   ├── views/               # Home, Explore, Shelves, Forum, Profile, Analytics
+│   │   └── types/               # Full TypeScript definitions
 │   ├── public/
 │   ├── package.json
-│   ├── vite.config.ts
-│   └── README.md
-├── docker-compose.yml
-├── .gitignore
+│   └── vite.config.ts           # Port 3000 with /api proxy to port 4000
+├── docker-compose.yml           # PostgreSQL 16 & Redis 7
 └── README.md
 ```
 
-## Database Schema Summary
+### Technology Highlights
+- **Frontend**: React 19, TypeScript, Vite (Port 3000), Lucide React icons, CSS design tokens.
+- **Backend**: Node.js 22+, Express 5, TypeScript, Prisma ORM 5.22, Redis 6+ / 7, Helmet, CORS, Morgan.
+- **Database**: PostgreSQL 16 (UUID primary keys, composite indexes, cascades).
+- **Security**: Privacy Shield middleware (strips `X-Forwarded-For`, `X-Real-IP`, `CF-Connecting-IP`), sliding-window Redis rate limiting, timing-safe bcrypt password comparison.
 
-The database is managed through Prisma and designed for a reading-social platform.
+---
 
-### Core entities
+## 🚀 Quick Start Guide
 
-- User
-  - unique username-style identifier (`biDanh`)
-  - password hash and recovery hash
-  - streak tracking
-  - avatar metadata and preferences
-  - relations to shelves, reviews, reading logs, goals, and refresh tokens
+### 1. Prerequisites
+- [Node.js](https://nodejs.org/) (v20+ recommended, tested on v22/v26)
+- [Docker](https://www.docker.com/) & Docker Compose (or local PostgreSQL & Redis services)
 
-- Book
-  - cover, title, authors, description, categories, rating metadata
-  - page count, published date
-  - relation to shelves, reviews, threads, and reading logs
-
-- Shelf
-  - linked to user and book
-  - supports types such as `WANT_TO_READ`, `CURRENTLY_READING`, `READ`, `DID_NOT_FINISH`, and `CUSTOM`
-  - tracks progress and status timestamps
-
-- Review
-  - user book reviews with rating and content
-  - spoiler flag and anonymous settings
-
-- ReadingLog
-  - tracks pages read, duration, start/end pages, notes, timestamps
-
-- Goal
-  - yearly reading goals with progress tracking and status
-
-- Thread / Post
-  - privacy-preserving discussion system with hashed author identities and display aliases
-  - spoiler-aware content and thread metadata
-
-### Privacy-oriented design
-
-The forum and request handling intentionally minimize tracking by:
-
-- anonymizing forum member identities using HMAC-derived aliases
-- removing IP-related headers in the privacy shield middleware
-- avoiding direct user identity linkage in public thread content
-
-## Backend Functionality
-
-The backend exposes modular API groups under `/api/v1`, including:
-
-- Auth
-- Books
-- Shelves
-- Forum
-- AI
-- Reading logs
-- Analytics
-
-This includes:
-
-- user authentication and token management
-- reading and book-related CRUD operations
-- social/book community features
-- anonymized discussion threads
-- AI-driven recommendation endpoints
-- push notifications and reminder infrastructure
-- health checks and runtime bootstrap
-
-## Frontend Features
-
-The frontend is a social reading interface inspired by Instagram-style layouts.
-
-Key UI areas include:
-
-- Home feed
-- Explore / discovery view
-- Reading quote / reels-like view
-- Shelves management
-- Forum discussions
-- Profile view
-- Story viewer and post creation modals
-- Auth modal and theme selection
-- Reading log and progress tracking modals
-
-## Setup and Running
-
-### 1. Start infrastructure services
-
+### 2. Start Database & Cache
 From the project root:
-
 ```bash
 docker compose up -d
 ```
+This boots:
+- **PostgreSQL** on `localhost:5432` (database: `bookaholic_db`)
+- **Redis** on `localhost:6379`
 
-This starts:
-
-- PostgreSQL on `localhost:5432`
-- Redis on `localhost:6379`
-
-### 2. Configure backend environment
-
-Copy the example environment file and update values:
-
+### 3. Backend Setup
 ```bash
 cd backend
 cp .env.example .env
-```
-
-Then fill in the necessary secrets, especially:
-
-- `DATABASE_URL`
-- `REDIS_URL`
-- `JWT_ACCESS_SECRET`
-- `JWT_REFRESH_SECRET`
-- `FORUM_ANONYMOUS_SECRET`
-- `OPENAI_API_KEY`
-- `VAPID_PUBLIC_KEY`
-- `VAPID_PRIVATE_KEY`
-
-### 3. Install backend dependencies
-
-```bash
-cd backend
 npm install
 ```
 
-### 4. Set up Prisma
-
-```bash
-cd backend
-npx prisma generate
-npx prisma db push
+Configure your `backend/.env` with required parameters:
+```ini
+PORT=4000
+NODE_ENV=development
+DATABASE_URL="postgresql://bookaholic_user:bookaholic_pass_2026!@localhost:5432/bookaholic_db?schema=public"
+REDIS_URL="redis://localhost:6379"
+JWT_ACCESS_SECRET="your-jwt-access-secret-min-32-chars"
+JWT_REFRESH_SECRET="your-jwt-refresh-secret-min-32-chars"
+FORUM_ANONYMOUS_SECRET="your-forum-hmac-secret-min-32-chars"
+CORS_ORIGINS="http://localhost:3000,http://localhost:5173"
+OPENAI_API_KEY="" # Optional for AI recommendation features
 ```
 
-Optional migrations:
-
+### 4. Database Migration & Seeding
 ```bash
-npm run db:migrate
+# Apply baseline migrations
+npx prisma migrate deploy
+
+# (Optional) Seed demo users, books, shelves, logs, and forum discussions
+npm run db:seed
 ```
 
-### 5. Start backend
-
+### 5. Launch Backend
 ```bash
-cd backend
 npm run dev
 ```
+API runs at **`http://localhost:4000`** (Health check: `http://localhost:4000/health`).
 
-The server starts on port `4000` by default.
-
-### 6. Install frontend dependencies
-
+### 6. Frontend Setup & Launch
+Open a new terminal:
 ```bash
 cd frontend
 npm install
-```
-
-### 7. Start frontend
-
-```bash
-cd frontend
 npm run dev
 ```
+Open **`http://localhost:3000`** in your browser. All `/api` requests are automatically proxied to `http://localhost:4000`.
 
-The frontend runs via Vite, typically on `http://localhost:5173`.
+---
 
-## Useful Scripts
+## 👥 Preloaded Demo Accounts
 
-### Backend package scripts
+When running `npm run db:seed`, three interactive profiles are available:
 
-- `npm run dev` → start the TypeScript dev server with hot reload
-- `npm run build` → compile TypeScript
-- `npm run start` → run the production build
-- `npm run db:migrate` → Prisma migration workflow
-- `npm run db:push` → push schema changes to PostgreSQL
-- `npm run db:generate` → generate Prisma client
-- `npm run db:seed` → seed the database
-- `npm run db:studio` → open Prisma Studio
+| Pseudonym (`biDanh`) | Password | Reading Persona | Streak |
+|---|---|---|---|
+| `sach_va_tra` | `Bookaholic@2026!` | Độc giả yêu trà & triết học | 7 ngày liên tiếp 🔥 |
+| `ke_ngao_du` | `Bookaholic@2026!` | Thích phiêu lưu & khoa học viễn tưởng | 12 ngày liên tiếp 🔥 |
+| `dem_muon_doc_sach` | `Bookaholic@2026!` | Cú đêm đọc tiểu thuyết cảm động | 3 ngày liên tiếp 🔥 |
 
-### Frontend package scripts
+You can switch between demo accounts instantly from the **Demo** tab in the Auth Modal, or register brand-new pseudonyms.
 
-- `npm run dev` → start Vite dev server
-- `npm run build` → build production bundle
-- `npm run lint` → run Oxc/oxlint checks
-- `npm run preview` → preview the production build locally
+---
 
-## Security and Privacy Notes
+## 📡 API Reference Overview
 
-Bookaholic includes a privacy-focused middleware layer and forum anonymity controls:
+All API endpoints reside under `/api/v1`:
 
-- request IP headers are scrubbed
-- public thread authors use one-way HMAC-derived aliases instead of real user identity
-- secure headers are enabled with Helmet
-- CORS is configured for trusted origins
-- rate limiting is applied to sensitive routes
+### Authentication (`/api/v1/auth`)
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `POST` | `/register` | Public | Register with `biDanh` & password; returns 160-bit Recovery Key |
+| `POST` | `/login` | Public | Constant-time authentication; sets `bkhl_rt` HttpOnly cookie |
+| `POST` | `/refresh` | Cookie | Rotates refresh token and returns fresh access token |
+| `POST` | `/recover` | Public | Reset password using 160-bit Recovery Key |
+| `GET` | `/me` | Bearer | Get current profile, streak count, and stats |
+| `PATCH` | `/me` | Bearer | Update avatar seed and reading preferences |
+| `PATCH` | `/password` | Bearer | Authenticated password change (revokes all active sessions) |
+| `POST` | `/logout` | Bearer | Invalidate current session and clear refresh cookie |
+| `POST` | `/logout-all` | Bearer | Invalidate all active sessions across all devices |
 
-## Summary
+### Books & Shelves (`/api/v1`)
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `GET` | `/books` | Optional | Paginated book catalog with category filters |
+| `GET` | `/books/:id` | Optional | Detailed book view with community ratings |
+| `GET` | `/books/search?q=` | Public | Search external books via Google Books API |
+| `POST` | `/books/:id/reviews`| Bearer | Submit book review with rating (1-5) and spoiler flag |
+| `GET` | `/shelves` | Bearer | Get current user's shelves (`type` filter supported) |
+| `PUT` | `/shelves` | Bearer | Add or move book to shelf |
+| `PATCH` | `/shelves/:id/progress` | Bearer | Update reading page progress for book |
+| `DELETE` | `/shelves/:id` | Bearer | Remove book from shelf |
 
-Bookaholic is a full-stack reading application that brings together:
+### Reading Logs & Analytics (`/api/v1`)
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `POST` | `/reading-logs/sync` | Bearer | Idempotent bulk sync of reading sessions |
+| `GET` | `/analytics/dashboard`| Bearer | User reading statistics, streak, and annual goals |
+| `GET` | `/analytics/reading-chart` | Bearer | Reading history aggregation by day/week |
 
-- reading-list management,
-- social book discovery,
-- anonymous discussion forums,
-- AI recommendations,
-- progress tracking,
-- and privacy-conscious community features.
+### Anonymous Forum (`/api/v1/forum`)
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `GET` | `/threads` | Public | List discussion threads (book-filtered or general) |
+| `POST` | `/threads` | Bearer | Create thread (author is HMAC-anonymized) |
+| `GET` | `/threads/:id/posts`| Public | Fetch nested post replies |
+| `POST` | `/posts` | Bearer | Reply to thread or post (author is HMAC-anonymized) |
 
-It combines a modern React frontend, a TypeScript Express backend, Prisma-managed PostgreSQL storage, and Redis-powered infrastructure in a single cohesive application.
+### AI Advisor (`/api/v1/ai`)
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `POST` | `/recommendations` | Bearer | Personalized recommendations by reading mood |
 
-## License
+---
 
-The project is currently configured with an ISC license in the backend package metadata, but the repository should be reviewed before commercial or public distribution beyond personal use.
+## 🧪 Automated Testing
+
+Bookaholic includes end-to-end integration and security test suites using Node's native test runner:
+
+```bash
+cd backend
+npm test
+```
+
+### What is tested:
+- **`tests/auth.test.ts`**:
+  - Registration & 160-bit recovery key entropy format verification
+  - Case-insensitive duplicate username collision detection
+  - Constant-time login failure on invalid credentials
+  - Profile retrieval (`GET /auth/me`) and modification (`PATCH /auth/me`)
+  - Authenticated password modification and automatic session revocation
+  - Refresh token rotation & cookie management
+  - Zero-knowledge account recovery via recovery key
+  - Single device logout & multi-device global session revocation
+- **`tests/security.test.ts`**:
+  - Strict tenant data isolation (User A cannot access or modify User B's shelves or reading logs)
+  - Unauthenticated access rejection across all protected routes (401 verification)
+  - Privacy Shield IP header scrubbing
+
+---
+
+## 🚢 Production Deployment Checklist
+
+1. **Environment Variables**:
+   - Set `NODE_ENV=production`.
+   - Set strong cryptographic secrets for `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, and `FORUM_ANONYMOUS_SECRET`.
+   - Ensure `CORS_ORIGINS` reflects the production frontend domain.
+2. **Database Migrations**:
+   - Run `npx prisma migrate deploy` in your CI/CD pipeline before starting the container/process.
+3. **Build Bundles**:
+   - Backend: `npm run build` generates typed CommonJS artifacts in `dist/`.
+   - Frontend: `npm run build` generates optimized assets in `dist/`.
+4. **HTTPS / SSL**:
+   - In production, refresh cookies automatically activate the `Secure` flag, requiring HTTPS.
+
+---
+
+## 📄 License
+
+ISC License.
