@@ -12,7 +12,10 @@ import {
 } from '../../utils/tokens';
 import {
   registerSchema,
+  loginSchema,
   recoverPasswordSchema,
+  updateProfileSchema,
+  changePasswordSchema,
 } from '../../utils/validation';
 import { ENV } from '../../config/env';
 
@@ -126,12 +129,13 @@ export async function register(req: Request, res: Response): Promise<void> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function login(req: Request, res: Response): Promise<void> {
-  const { biDanh, password, deviceType = 'web' } = req.body;
-
-  if (!biDanh || !password) {
+  const parsed = loginSchema.safeParse(req.body);
+  if (!parsed.success) {
     res.status(400).json({ error: 'biDanh and password are required' });
     return;
   }
+
+  const { biDanh, password, deviceType } = parsed.data;
 
   const user = await prisma.user.findFirst({
     where: { biDanh: { equals: biDanh, mode: 'insensitive' } },
@@ -192,10 +196,14 @@ export async function refreshTokens(req: Request, res: Response): Promise<void> 
 
   const stored = await prisma.refreshToken.findUnique({
     where: { tokenHash },
-    include: { user: { select: { id: true, biDanh: true } } },
+    include: { user: { select: { id: true, biDanh: true, avatarSeed: true, currentStreak: true } } },
   });
 
   if (!stored || stored.expiresAt < new Date()) {
+    // If stored token exists but is expired, clean it up
+    if (stored) {
+      await prisma.refreshToken.delete({ where: { id: stored.id } }).catch(() => {});
+    }
     res.clearCookie(COOKIE_NAME, refreshCookieOptions());
     res.status(401).json({ error: 'Refresh token invalid or expired' });
     return;
@@ -215,6 +223,12 @@ export async function refreshTokens(req: Request, res: Response): Promise<void> 
 
   res.json({
     accessToken: signAccessToken(stored.user.id),
+    user: {
+      id: stored.user.id,
+      biDanh: stored.user.biDanh,
+      avatarSeed: stored.user.avatarSeed,
+      currentStreak: stored.user.currentStreak,
+    },
   });
 }
 
@@ -232,6 +246,159 @@ export async function logout(req: Request, res: Response): Promise<void> {
 
   res.clearCookie(COOKIE_NAME, refreshCookieOptions());
   res.status(200).json({ message: 'Logged out successfully' });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  POST /api/v1/auth/logout-all
+// ─────────────────────────────────────────────────────────────────────────────
+
+export async function logoutAll(req: Request, res: Response): Promise<void> {
+  const userId = req.userId!;
+
+  await prisma.refreshToken.deleteMany({ where: { userId } });
+
+  res.clearCookie(COOKIE_NAME, refreshCookieOptions());
+  res.status(200).json({ message: 'All sessions revoked successfully' });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  GET /api/v1/auth/me
+// ─────────────────────────────────────────────────────────────────────────────
+
+export async function getMe(req: Request, res: Response): Promise<void> {
+  const userId = req.userId!;
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      biDanh: true,
+      avatarSeed: true,
+      preferences: true,
+      currentStreak: true,
+      longestStreak: true,
+      lastReadDate: true,
+      createdAt: true,
+      updatedAt: true,
+      _count: {
+        select: {
+          shelves: true,
+          reviews: true,
+          readingLogs: true,
+          goals: true,
+        },
+      },
+    },
+  });
+
+  if (!user) {
+    res.status(404).json({ error: 'User not found' });
+    return;
+  }
+
+  res.json({ user });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  PATCH /api/v1/auth/me
+// ─────────────────────────────────────────────────────────────────────────────
+
+export async function updateMe(req: Request, res: Response): Promise<void> {
+  const userId = req.userId!;
+
+  const parsed = updateProfileSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: 'Validation failed', details: parsed.error.flatten() });
+    return;
+  }
+
+  const { avatarSeed, preferences } = parsed.data;
+
+  const updateData: Record<string, unknown> = {};
+  if (avatarSeed !== undefined) updateData.avatarSeed = avatarSeed;
+  if (preferences !== undefined) updateData.preferences = preferences;
+
+  if (Object.keys(updateData).length === 0) {
+    res.status(400).json({ error: 'No fields to update' });
+    return;
+  }
+
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: updateData,
+    select: {
+      id: true,
+      biDanh: true,
+      avatarSeed: true,
+      preferences: true,
+      currentStreak: true,
+      longestStreak: true,
+      lastReadDate: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  res.json({ user });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  PATCH /api/v1/auth/password
+// ─────────────────────────────────────────────────────────────────────────────
+
+export async function changePassword(req: Request, res: Response): Promise<void> {
+  const userId = req.userId!;
+
+  const parsed = changePasswordSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: 'Validation failed', details: parsed.error.flatten() });
+    return;
+  }
+
+  const { currentPassword, newPassword } = parsed.data;
+
+  // 1. Fetch the current password hash
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { passwordHash: true },
+  });
+
+  if (!user) {
+    res.status(404).json({ error: 'User not found' });
+    return;
+  }
+
+  // 2. Verify current password
+  const isCurrentValid = await bcrypt.compare(currentPassword, user.passwordHash);
+  if (!isCurrentValid) {
+    res.status(401).json({ error: 'Current password is incorrect' });
+    return;
+  }
+
+  // 3. Hash new password and update, revoking all other sessions
+  const newPasswordHash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
+
+  // Keep the current session's refresh token, revoke all others
+  const rawToken: string | undefined = req.cookies?.[COOKIE_NAME];
+  const currentTokenHash = rawToken ? hashRefreshToken(rawToken) : null;
+
+  await prisma.$transaction([
+    prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash: newPasswordHash },
+    }),
+    // Delete all refresh tokens EXCEPT the current one
+    prisma.refreshToken.deleteMany({
+      where: {
+        userId,
+        ...(currentTokenHash ? { tokenHash: { not: currentTokenHash } } : {}),
+      },
+    }),
+  ]);
+
+  res.status(200).json({
+    message: 'Password changed successfully. Other sessions have been revoked.',
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

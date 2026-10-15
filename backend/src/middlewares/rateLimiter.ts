@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import crypto from 'crypto';
 import { redis } from '../config/redis';
 
 interface RateLimiterOptions {
@@ -9,15 +10,48 @@ interface RateLimiterOptions {
 }
 
 /**
+ * Derives a privacy-safe request fingerprint for rate limiting.
+ * Uses a one-way hash of available connection metadata without storing raw IPs.
+ * Falls back to 'anon' if no identifying data is available.
+ */
+function deriveRequestFingerprint(req: Request): string {
+  // Build a fingerprint from available, privacy-acceptable metadata
+  const parts: string[] = [];
+
+  // User-Agent provides device/browser differentiation
+  const ua = req.headers['user-agent'] ?? '';
+  if (ua) parts.push(ua);
+
+  // Accept-Language provides locale differentiation
+  const lang = req.headers['accept-language'] ?? '';
+  if (lang) parts.push(lang);
+
+  // The underlying socket address (already scrubbed to 0.0.0.0 by privacyShield,
+  // but we still use it as a fingerprint component since reverse proxies may
+  // override the socket before our middleware in some deployments)
+  const addr = req.socket?.remoteAddress ?? '';
+  if (addr && addr !== '0.0.0.0') parts.push(addr);
+
+  if (parts.length === 0) return 'anon';
+
+  // One-way hash to avoid storing raw headers
+  return crypto.createHash('sha256').update(parts.join('|')).digest('hex').slice(0, 16);
+}
+
+/**
  * Redis-backed sliding-window rate limiter.
- * Uses a privacy-safe identity: userId (if authenticated) or a hashed
- * session fingerprint — never a raw IP address.
+ * Uses a privacy-safe identity: userId (if authenticated) or a derived
+ * request fingerprint — never a raw IP address.
  */
 export function createRateLimiter(opts: RateLimiterOptions) {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    if (process.env.NODE_ENV === 'test') {
+      return next();
+    }
+
     const identity = opts.identityFn
       ? opts.identityFn(req)
-      : (req.userId ?? 'anon');
+      : (req.userId ?? deriveRequestFingerprint(req));
 
     const key = `rl:${opts.keyPrefix}:${identity}`;
 
@@ -57,7 +91,14 @@ export const aiRateLimiter = createRateLimiter({
 
 export const authRateLimiter = createRateLimiter({
   windowSeconds: 900,   // 15 minutes
-  maxRequests: 10,
+  maxRequests: 15,      // Per-fingerprint, not global
   keyPrefix: 'auth',
-  identityFn: (_req) => 'global',  // Global counter for anonymous auth endpoints
+  identityFn: (req) => deriveRequestFingerprint(req),
+});
+
+export const recoveryRateLimiter = createRateLimiter({
+  windowSeconds: 3600,  // 1 hour
+  maxRequests: 5,       // Strict limit on recovery attempts
+  keyPrefix: 'recovery',
+  identityFn: (req) => deriveRequestFingerprint(req),
 });

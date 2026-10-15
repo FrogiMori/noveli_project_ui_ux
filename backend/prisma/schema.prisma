@@ -47,6 +47,7 @@ model User {
   longestStreak    Int       @default(0)
   lastReadDate     DateTime?
   createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @default(now()) @updatedAt
 
   refreshTokens     RefreshToken[]
   pushSubscriptions PushSubscription[]

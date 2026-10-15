@@ -26,11 +26,13 @@ export function hashRefreshToken(raw: string): string {
 }
 
 // ─── Recovery Key ────────────────────────────────────────────
-// Format: BKHL-XXXX-XXXX-XXXX-XXXX  (16 random hex chars in 4 groups)
+// Format: BKHL-XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX (160-bit = 20 random bytes)
 
 export function generateRecoveryKey(): string {
-  const segment = () => crypto.randomBytes(2).toString('hex').toUpperCase();
-  return `BKHL-${segment()}${segment()}-${segment()}${segment()}-${segment()}${segment()}-${segment()}${segment()}`;
+  const bytes = crypto.randomBytes(20);
+  const hex = bytes.toString('hex').toUpperCase();
+  // Split into 5 groups of 8 hex chars
+  return `BKHL-${hex.slice(0, 8)}-${hex.slice(8, 16)}-${hex.slice(16, 24)}-${hex.slice(24, 32)}-${hex.slice(32, 40)}`;
 }
 
 export function hashRecoveryKey(key: string): string {

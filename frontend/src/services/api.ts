@@ -13,7 +13,7 @@ import {
 
 const BASE_URL = '/api/v1';
 
-function getToken(): string | null {
+export function getToken(): string | null {
   return localStorage.getItem('bookaholic_token');
 }
 
@@ -25,7 +25,46 @@ export function clearToken(): void {
   localStorage.removeItem('bookaholic_token');
 }
 
-async function fetchWithAuth<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+let isRefreshing = false;
+let refreshSubscribers: ((token: string | null) => void)[] = [];
+
+function onTokenRefreshed(token: string | null) {
+  refreshSubscribers.forEach((callback) => callback(token));
+  refreshSubscribers = [];
+}
+
+function addRefreshSubscriber(callback: (token: string | null) => void) {
+  refreshSubscribers.push(callback);
+}
+
+async function refreshAccessToken(): Promise<string | null> {
+  try {
+    const res = await fetch(`${BASE_URL}/auth/refresh`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!res.ok) {
+      clearToken();
+      return null;
+    }
+
+    const data = await res.json();
+    if (data.accessToken) {
+      setToken(data.accessToken);
+      return data.accessToken;
+    }
+    return null;
+  } catch {
+    clearToken();
+    return null;
+  }
+}
+
+async function fetchWithAuth<T>(endpoint: string, options: RequestInit = {}, retry = true): Promise<T> {
   const token = getToken();
   const headers = new Headers(options.headers || {});
   headers.set('Content-Type', 'application/json');
@@ -35,11 +74,35 @@ async function fetchWithAuth<T>(endpoint: string, options: RequestInit = {}): Pr
 
   const res = await fetch(`${BASE_URL}${endpoint}`, {
     ...options,
+    credentials: 'include',
     headers,
   });
 
+  if (res.status === 401 && retry && !endpoint.startsWith('/auth/login') && !endpoint.startsWith('/auth/refresh') && !endpoint.startsWith('/auth/register')) {
+    if (!isRefreshing) {
+      isRefreshing = true;
+      const newToken = await refreshAccessToken();
+      isRefreshing = false;
+      onTokenRefreshed(newToken);
+
+      if (newToken) {
+        return fetchWithAuth<T>(endpoint, options, false);
+      }
+    } else {
+      return new Promise<T>((resolve, reject) => {
+        addRefreshSubscriber((newToken) => {
+          if (newToken) {
+            resolve(fetchWithAuth<T>(endpoint, options, false));
+          } else {
+            reject(new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.'));
+          }
+        });
+      });
+    }
+  }
+
   if (!res.ok) {
-    let errorMsg = 'An unexpected error occurred';
+    let errorMsg = 'Đã có lỗi xảy ra';
     try {
       const data = await res.json();
       errorMsg = data.error || errorMsg;
@@ -54,7 +117,7 @@ async function fetchWithAuth<T>(endpoint: string, options: RequestInit = {}): Pr
 
 export const api = {
   // ── Auth ─────────────────────────────────────────────
-  login: async (biDanh: string, password: string):Promise<{ user: User; accessToken: string }> => {
+  login: async (biDanh: string, password: string): Promise<{ user: User; accessToken: string }> => {
     const res = await fetchWithAuth<{ user: User; accessToken: string }>('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ biDanh, password }),
@@ -70,6 +133,55 @@ export const api = {
     });
     setToken(res.accessToken);
     return res;
+  },
+
+  getMe: async (): Promise<{ user: User }> => {
+    return fetchWithAuth<{ user: User }>('/auth/me');
+  },
+
+  updateMe: async (data: { avatarSeed?: string; preferences?: Record<string, unknown> }): Promise<{ user: User }> => {
+    return fetchWithAuth<{ user: User }>('/auth/me', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  },
+
+  changePassword: async (currentPassword: string, newPassword: string): Promise<{ message: string }> => {
+    return fetchWithAuth<{ message: string }>('/auth/password', {
+      method: 'PATCH',
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+  },
+
+  recoverPassword: async (biDanh: string, recoveryKey: string, newPassword: string): Promise<{ message: string }> => {
+    return fetchWithAuth<{ message: string }>('/auth/recover', {
+      method: 'POST',
+      body: JSON.stringify({ biDanh, recoveryKey, newPassword }),
+    });
+  },
+
+  refreshToken: async (): Promise<string | null> => {
+    return refreshAccessToken();
+  },
+
+  logout: async (): Promise<void> => {
+    try {
+      await fetchWithAuth('/auth/logout', { method: 'POST' }, false);
+    } catch {
+      // ignore network errors on logout
+    } finally {
+      clearToken();
+    }
+  },
+
+  logoutAll: async (): Promise<void> => {
+    try {
+      await fetchWithAuth('/auth/logout-all', { method: 'POST' }, false);
+    } catch {
+      // ignore network errors
+    } finally {
+      clearToken();
+    }
   },
 
   // ── Books ────────────────────────────────────────────
